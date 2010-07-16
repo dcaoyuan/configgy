@@ -64,7 +64,7 @@ class RuntimeEnvironment(cls: Class[_]) {
         case pattern(path) => Some(new File(path).getCanonicalPath)
         case _ => None
       }
-    }.flatMap(identity[Option[String]]).firstOption
+    }.toSeq.flatten.headOption
   }
 
   /**

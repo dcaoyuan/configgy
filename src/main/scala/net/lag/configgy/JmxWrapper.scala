@@ -17,7 +17,7 @@
 package net.lag.configgy
 
 import javax.{management => jmx}
-import scala.collection.jcl
+import scala.collection.JavaConversions
 import net.lag.logging.Logger
 
 
@@ -112,7 +112,7 @@ class JmxWrapper(node: Attributes) extends jmx.DynamicMBean {
   }
 
   def setAttributes(attrs: jmx.AttributeList): jmx.AttributeList = {
-    for (attr <- jcl.Buffer(attrs.asList)) setAttribute(attr)
+    for (attr <- JavaConversions.asBuffer(attrs.asList)) setAttribute(attr)
     attrs
   }
 }

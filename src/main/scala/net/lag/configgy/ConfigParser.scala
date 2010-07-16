@@ -88,7 +88,7 @@ private[configgy] class ConfigParser(var attr: Attributes, val importer: Importe
 
   private def openBlock(name: String, attrList: List[(String, String)]) = {
     val parent = if (sections.size > 0) attr.makeAttributes(sections.mkString(".")) else attr
-    sections += name
+    sections push name
     prefix = sections.mkString("", ".", ".")
     val newBlock = attr.makeAttributes(sections.mkString("."))
     for ((k, v) <- attrList) k match {

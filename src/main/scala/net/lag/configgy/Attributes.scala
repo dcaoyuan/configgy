@@ -44,7 +44,7 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
     copyFrom.copyInto(this)
   }
 
-  def keys: Iterator[String] = cells.keys
+  def keys: Iterator[String] = cells.keysIterator
 
   def getName() = name
 

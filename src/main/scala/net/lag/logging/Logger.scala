@@ -229,12 +229,12 @@ object Logger {
   /**
    * Return a map of log level values to the corresponding Level objects.
    */
-  def levels: Map[Int, Level] = levelsMap.readOnly
+  def levels: Map[Int, Level] = levelsMap
 
   /**
    * Return a map of log level names to the corresponding Level objects.
    */
-  def levelNames: Map[String, Level] = levelNamesMap.readOnly
+  def levelNames: Map[String, Level] = levelNamesMap
 
   /**
    * Reset logging to an initial state, where all logging is set at
