@@ -19,7 +19,7 @@ package net.lag.logging
 import net.lag.TestHelper
 import _root_.org.specs._
 
-object ThrottledLoggerSpec extends Specification with TestHelper {
+object ThrottledLoggerSpec extends SpecificationWithJUnit with TestHelper {
   private var handler: Handler = null
 
   "ThrottledLogger" should {

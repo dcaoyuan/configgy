@@ -80,7 +80,7 @@ class ImmediatelyRollingFileHandler(filename: String, policy: Policy, append: Bo
 }
 
 
-object LoggingSpec extends Specification with TestHelper {
+object LoggingSpec extends SpecificationWithJUnit with TestHelper {
 
   private var handler: Handler = null
 

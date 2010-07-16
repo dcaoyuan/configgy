@@ -24,7 +24,7 @@ import _root_.net.lag.TestHelper
 import org.specs._
 
 
-class ConfigSpec extends Specification with TestHelper {
+class ConfigSpec extends SpecificationWithJUnit with TestHelper {
 
   class FakeSubscriber extends Subscriber {
     def validate(current: Option[ConfigMap], replacement: Option[ConfigMap]): Unit = { }

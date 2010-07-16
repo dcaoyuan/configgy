@@ -20,7 +20,7 @@ import net.lag.extensions._
 import org.specs._
 
 
-class ExtensionsSpec extends Specification {
+class ExtensionsSpec extends SpecificationWithJUnit {
   "extensions" should {
     "quoteC" in {
       "nothing".quoteC mustEqual "nothing"

@@ -21,7 +21,7 @@ import net.lag.logging.{Level, Logger}
 import org.specs._
 
 
-class AttributesSpec extends Specification {
+class AttributesSpec extends SpecificationWithJUnit {
 
   "Attributes" should {
     "set values" in {
