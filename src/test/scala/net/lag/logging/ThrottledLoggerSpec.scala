@@ -16,6 +16,7 @@
 
 package net.lag.logging
 
+import net.lag.TestHelper
 import _root_.org.specs._
 
 object ThrottledLoggerSpec extends Specification with TestHelper {

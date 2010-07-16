@@ -20,6 +20,7 @@ import _root_.java.io._
 import _root_.java.net.{DatagramPacket, DatagramSocket, InetSocketAddress}
 import _root_.java.util.{Calendar, Date, TimeZone, logging => javalog}
 import _root_.org.specs._
+import _root_.net.lag.TestHelper
 import _root_.net.lag.configgy.Config
 import _root_.net.lag.extensions._
 

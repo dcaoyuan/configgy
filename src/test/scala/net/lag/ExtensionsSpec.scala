@@ -39,12 +39,12 @@ class ExtensionsSpec extends Specification {
     }
 
     "hexlify" in {
-      "hello".getBytes.slice(1, 4).force.hexlify mustEqual "656c6c"
+      "hello".getBytes.slice(1, 4).hexlify mustEqual "656c6c"
       "hello".getBytes.hexlify mustEqual "68656c6c6f"
     }
 
     "unhexlify" in {
-      "656c6c".unhexlify.toList mustEqual "hello".getBytes.slice(1, 4).force.toList
+      "656c6c".unhexlify.toList mustEqual "hello".getBytes.slice(1, 4).toList
       "68656c6c6f".unhexlify.toList mustEqual "hello".getBytes.toList
     }
   }
