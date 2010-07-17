@@ -31,15 +31,20 @@ sealed case class Level(name: String, value: Int) extends javalog.Level(name, va
 }
 
 object Level {
-  case object OFF extends Level("OFF", Math.MAX_INT)
+  case object OFF extends Level("OFF", Int.MaxValue)  // javalog.Level.OFF
   case object FATAL extends Level("FATAL", 1000)
   case object CRITICAL extends Level("CRITICAL", 970)
   case object ERROR extends Level("ERROR", 930)
-  case object WARNING extends Level("WARNING", 900)
-  case object INFO extends Level("INFO", 800)
+  case object WARNING extends Level("WARNING", 900)   // javalog.Level.WARNING
+  case object INFO extends Level("INFO", 800)         // javalog.Level.INFO
   case object DEBUG extends Level("DEBUG", 500)
   case object TRACE extends Level("TRACE", 400)
-  case object ALL extends Level("ALL", Math.MIN_INT)
+  case object ALL extends Level("ALL", Int.MinValue)  // javalog.Level.ALL
+
+  private case object SEVERE extends Level(javalog.Level.SEVERE.getName, javalog.Level.SEVERE.intValue) // 1000
+  private case object CONFIG extends Level(javalog.Level.CONFIG.getName, javalog.Level.CONFIG.intValue) // 700
+  private case object FINE extends Level(javalog.Level.FINE.getName, javalog.Level.FINE.intValue)       // 500
+  private case object FINEST extends Level(javalog.Level.FINEST.getName, javalog.Level.FINEST.intValue) // 300
 }
 
 
@@ -82,7 +87,7 @@ class Logger private(val name: String, private val wrapped: javalog.Logger) {
 
   override def toString = {
     "<%s name='%s' level=%s handlers=%s use_parent=%s>".format(getClass.getName, name, getLevel(),
-      getHandlers().toList.mkString("[", ", ", "]"), if (getUseParentHandlers()) "true" else "false")
+                                                               getHandlers().toList.mkString("[", ", ", "]"), if (getUseParentHandlers()) "true" else "false")
   }
 
   /**
@@ -333,7 +338,7 @@ object Logger {
       val item = manager.getLogger(e.nextElement.asInstanceOf[String])
       if (item ne null) loggers += get(item.getName)
     }
-    loggers.elements
+    loggers.iterator
   }
 
   /**
