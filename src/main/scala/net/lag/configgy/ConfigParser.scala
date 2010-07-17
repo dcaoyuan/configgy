@@ -38,6 +38,8 @@ private[configgy] class ConfigParser(var attr: Attributes, val importer: Importe
   val sections = new Stack[String]
   var prefix = ""
 
+ // Stack reversed iteration order from 2.7 to 2.8!!
+  def sectionsString = sections.toList.reverse.mkString(".")
 
   // tokens
   override val whiteSpace = """(\s+|#[^\n]*\n)+""".r
@@ -53,12 +55,12 @@ private[configgy] class ConfigParser(var attr: Attributes, val importer: Importe
 
   def includeFile = "include" ~> string ^^ {
     case filename: String =>
-      new ConfigParser(attr.makeAttributes(sections.mkString(".")), importer) parse importer.importFile(filename)
+      new ConfigParser(attr.makeAttributes(sectionsString), importer) parse importer.importFile(filename)
   }
 
   def includeOptFile = "include?" ~> string ^^ {
     case filename: String =>
-      new ConfigParser(attr.makeAttributes(sections.mkString(".")), importer) parse importer.importFile(filename, false)
+      new ConfigParser(attr.makeAttributes(sectionsString), importer) parse importer.importFile(filename, false)
   }
 
   def assignment = identToken ~ assignToken ~ value ^^ {
@@ -87,10 +89,10 @@ private[configgy] class ConfigParser(var attr: Attributes, val importer: Importe
   def sectionCloseBrace = "}" ^^ { x => closeBlock(None) }
 
   private def openBlock(name: String, attrList: List[(String, String)]) = {
-    val parent = if (sections.size > 0) attr.makeAttributes(sections.mkString(".")) else attr
+    val parent = if (!sections.isEmpty) attr.makeAttributes(sectionsString) else attr
     sections push name
-    prefix = sections.mkString("", ".", ".")
-    val newBlock = attr.makeAttributes(sections.mkString("."))
+    prefix = sectionsString + "."
+    val newBlock = attr.makeAttributes(sectionsString)
     for ((k, v) <- attrList) k match {
       case "inherit" =>
         newBlock.inheritFrom = Some(if (parent.getConfigMap(v).isDefined) parent.makeAttributes(v) else attr.makeAttributes(v))
@@ -107,7 +109,7 @@ private[configgy] class ConfigParser(var attr: Attributes, val importer: Importe
       if (name.isDefined && last != name.get) {
         failure("got closing tag for " + name.get + ", expected " + last)
       } else {
-        prefix = if (sections.isEmpty) "" else sections.mkString("", ".", ".")
+        prefix = if (sections.isEmpty) "" else sectionsString + "."
       }
     }
   }
