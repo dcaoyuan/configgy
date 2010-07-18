@@ -80,7 +80,12 @@ class FilesystemImporter(val baseFolder: String) extends Importer {
       ""
     } else {
       try {
-        streamToString(new FileInputStream(f))
+        val is = new FileInputStream(f)
+        if (is != null) {
+          val str = streamToString(is)
+          is.close
+          str
+        } else ""
       } catch {
         case x => throw new ParseException(x.toString)
       }
@@ -96,14 +101,16 @@ class FilesystemImporter(val baseFolder: String) extends Importer {
 class ResourceImporter(classLoader: ClassLoader) extends Importer {
   def importFile(filename: String, required: Boolean): String = {
     try {
-      val stream = classLoader.getResourceAsStream(filename)
-      if (stream eq null) {
+      val is = classLoader.getResourceAsStream(filename)
+      if (is eq null) {
         if (required) {
           throw new ParseException("Can't find resource: " + filename)
         }
         ""
       } else {
-        streamToString(stream)
+        val str = streamToString(is)
+        is.close
+        str
       }
     } catch {
       case x => throw new ParseException(x.toString)

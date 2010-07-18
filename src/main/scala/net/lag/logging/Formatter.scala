@@ -135,6 +135,7 @@ abstract class Formatter extends javalog.Formatter {
 
   override def format(record: javalog.LogRecord): String = {
     val name = record.getLoggerName match {
+      case null => "(null)"
       case "" => "(root)"
       case n => {
         val nameSegments = n.split("\\.")
@@ -162,6 +163,7 @@ abstract class Formatter extends javalog.Formatter {
         }
     }
 
+    if (message == null) message = "(null)"
     if ((truncateAt > 0) && (message.length > truncateAt)) {
       message = message.substring(0, truncateAt) + "..."
     }

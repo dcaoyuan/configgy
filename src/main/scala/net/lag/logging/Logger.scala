@@ -45,6 +45,8 @@ object Level {
   private case object CONFIG extends Level(javalog.Level.CONFIG.getName, javalog.Level.CONFIG.intValue) // 700
   private case object FINE extends Level(javalog.Level.FINE.getName, javalog.Level.FINE.intValue)       // 500
   private case object FINEST extends Level(javalog.Level.FINEST.getName, javalog.Level.FINEST.intValue) // 300
+
+  val allLevels = List(OFF, FATAL, CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE, ALL, SEVERE, CONFIG, FINE, FINEST)
 }
 
 
@@ -171,6 +173,7 @@ class Logger private(val name: String, private val wrapped: javalog.Logger) {
 
 
 object Logger {
+
   private[logging] val levelNamesMap = new mutable.HashMap[String, Level]
   private[logging] val levelsMap = new mutable.HashMap[Int, Level]
 
@@ -182,6 +185,9 @@ object Logger {
   // clear out some cruft from the java root logger.
   private val javaRoot = javalog.Logger.getLogger("")
 
+  // to force them to get loaded from class files:
+  Level.allLevels
+  //reset
 
   // ----- convenience methods:
 
@@ -218,19 +224,6 @@ object Logger {
   /** ALL is used to log everything. */
   def ALL = Level.ALL
 
-  // to force them to get loaded from class files:
-  root.setLevel(OFF)
-  root.setLevel(FATAL)
-  root.setLevel(CRITICAL)
-  root.setLevel(ERROR)
-  root.setLevel(WARNING)
-  root.setLevel(INFO)
-  root.setLevel(DEBUG)
-  root.setLevel(TRACE)
-  root.setLevel(ALL)
-  reset
-
-
   /**
    * Return a map of log level values to the corresponding Level objects.
    */
@@ -257,9 +250,9 @@ object Logger {
   def clearHandlers() = {
     for (logger <- elements) {
       // some custom Logger implementations may return null from getHandlers
-      val handlers = logger.getHandlers()
+      val handlers = logger.getHandlers
       if (handlers ne null) {
-        for (handler <- logger.getHandlers) {
+        for (handler <- handlers) {
           try {
             handler.close()
           } catch { case _ => () }
@@ -329,16 +322,19 @@ object Logger {
   /**
    * Iterate the Logger objects that have been created.
    */
-  def elements: Iterator[Logger] = {
+  def elements: Seq[Logger] = {
     val manager = javalog.LogManager.getLogManager
-    val loggers = new mutable.Queue[Logger]
+    val loggers = new mutable.ListBuffer[Logger]
     // why on earth did java use ENUMERATION here?!
     val e = manager.getLoggerNames
     while (e.hasMoreElements) {
-      val item = manager.getLogger(e.nextElement.asInstanceOf[String])
-      if (item ne null) loggers += get(item.getName)
+      manager.getLogger(e.nextElement.asInstanceOf[String]) match {
+        // only accept item which is instance of this Logger class
+        case item: Logger => loggers += item //get(item.getName)
+        case _ =>
+      }
     }
-    loggers.iterator
+    loggers
   }
 
   /**
@@ -373,8 +369,9 @@ object Logger {
     }
 
     val logger = Logger.get(config.getString("node", ""))
+    println("configue logging " + logger.name)
     if (!validateOnly && allowNestedBlocks) {
-      for (val handler <- logger.getHandlers) {
+      for (handler <- logger.getHandlers) {
         logger.removeHandler(handler)
       }
     }
