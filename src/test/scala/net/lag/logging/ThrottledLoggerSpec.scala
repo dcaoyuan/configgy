@@ -24,13 +24,13 @@ object ThrottledLoggerSpec extends SpecificationWithJUnit with TestHelper {
 
   "ThrottledLogger" should {
     doBefore {
-      Logger.clearHandlers
+      Logger.clearHandlers()
       handler = new StringHandler(new GenericFormatter(""))
       Logger.get("").addHandler(handler)
     }
 
     doAfter {
-      Logger.clearHandlers
+      Logger.clearHandlers()
     }
 
     "throttle keyed log messages" in {

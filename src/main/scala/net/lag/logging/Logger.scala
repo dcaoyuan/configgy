@@ -37,13 +37,13 @@ object Level {
   case object ERROR extends Level("ERROR", 930)
   case object WARNING extends Level("WARNING", 900)   // javalog.Level.WARNING
   case object INFO extends Level("INFO", 800)         // javalog.Level.INFO
-  case object DEBUG extends Level("DEBUG", 500)
+  case object DEBUG extends Level("DEBUG", 600)
   case object TRACE extends Level("TRACE", 400)
   case object ALL extends Level("ALL", Int.MinValue)  // javalog.Level.ALL
 
   private case object SEVERE extends Level(javalog.Level.SEVERE.getName, javalog.Level.SEVERE.intValue) // 1000
   private case object CONFIG extends Level(javalog.Level.CONFIG.getName, javalog.Level.CONFIG.intValue) // 700
-  private case object FINE extends Level(javalog.Level.FINE.getName, javalog.Level.FINE.intValue)       // 500
+  private case object FINE   extends Level(javalog.Level.FINE.getName,   javalog.Level.FINE.intValue)     // 500
   private case object FINEST extends Level(javalog.Level.FINEST.getName, javalog.Level.FINEST.intValue) // 300
 
   val allLevels = List(OFF, FATAL, CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE, ALL, SEVERE, CONFIG, FINE, FINEST)
@@ -187,7 +187,7 @@ object Logger {
 
   // to force them to get loaded from class files:
   Level.allLevels
-  //reset
+  reset
 
   // ----- convenience methods:
 
@@ -240,15 +240,15 @@ object Logger {
    * handlers are removed.
    */
   def reset() = {
-    clearHandlers
+    clearHandlers()
     javaRoot.addHandler(new ConsoleHandler(new FileFormatter))
   }
 
   /**
-   * Remove all existing log handlers from all existing loggers.
+   * Remove all existing log handlers from loggers.
    */
-  def clearHandlers() = {
-    for (logger <- elements) {
+  def clearHandlers(loggers: Seq[Logger] = elements) = {
+    for (logger <- loggers) {
       // some custom Logger implementations may return null from getHandlers
       val handlers = logger.getHandlers
       if (handlers ne null) {
@@ -329,9 +329,8 @@ object Logger {
     val e = manager.getLoggerNames
     while (e.hasMoreElements) {
       manager.getLogger(e.nextElement.asInstanceOf[String]) match {
-        // only accept item which is instance of this Logger class
-        case item: Logger => loggers += item //get(item.getName)
-        case _ =>
+        case null =>
+        case item => loggers += get(item.getName)
       }
     }
     loggers
@@ -368,10 +367,12 @@ object Logger {
       throw new LoggingException("Unknown logging config attribute(s): " + forbidden.mkString(", "))
     }
 
-    val logger = Logger.get(config.getString("node", ""))
-    println("configue logging " + logger.name)
+    val theLogger = Logger.get(config.getString("node", ""))
+    val loggers = if (theLogger.name == "") elements else List(theLogger)
     if (!validateOnly && allowNestedBlocks) {
-      for (handler <- logger.getHandlers) {
+      for (logger <- loggers;
+           handler <- logger.getHandlers
+      ) {
         logger.removeHandler(handler)
       }
     }
@@ -448,19 +449,21 @@ object Logger {
       handler.truncateStackTracesAt = config.getInt("truncate_stack_traces", 30)
       handler.formatter.useFullPackageNames = config.getBool("use_full_package_names", false)
       if (! validateOnly) {
-        logger.addHandler(handler)
+        loggers foreach (_.addHandler(handler))
       }
     }
 
     if (! validateOnly) {
-      logger.setUseParentHandlers(config.getBool("use_parents", true))
-      level.foreach { level =>
-        if (logger.getLevel() eq null) {
-          logger.setLevel(level)
+      for (logger <- loggers) {
+        logger.setUseParentHandlers(config.getBool("use_parents", true))
+        level.foreach { level =>
+          if (logger.getLevel() eq null) {
+            logger.setLevel(level)
+          }
         }
       }
     }
 
-    logger
+    theLogger
   }
 }

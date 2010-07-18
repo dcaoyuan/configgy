@@ -96,13 +96,13 @@ object LoggingSpec extends SpecificationWithJUnit with TestHelper {
 
   "Logging" should {
     doBefore {
-      Logger.clearHandlers
+      Logger.clearHandlers()
       handler = new TimeWarpingStringHandler
       Logger.get("").addHandler(handler)
     }
 
     doAfter {
-      Logger.clearHandlers
+      Logger.clearHandlers()
     }
 
     "provide level name and value maps" in {
