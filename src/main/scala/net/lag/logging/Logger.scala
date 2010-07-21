@@ -43,7 +43,7 @@ object Level {
 
   private case object SEVERE extends Level(javalog.Level.SEVERE.getName, javalog.Level.SEVERE.intValue) // 1000
   private case object CONFIG extends Level(javalog.Level.CONFIG.getName, javalog.Level.CONFIG.intValue) // 700
-  private case object FINE   extends Level(javalog.Level.FINE.getName,   javalog.Level.FINE.intValue)     // 500
+  private case object FINE   extends Level(javalog.Level.FINE.getName,   javalog.Level.FINE.intValue)   // 500
   private case object FINEST extends Level(javalog.Level.FINEST.getName, javalog.Level.FINEST.intValue) // 300
 
   val allLevels = List(OFF, FATAL, CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE, ALL, SEVERE, CONFIG, FINE, FINEST)
