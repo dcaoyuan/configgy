@@ -20,7 +20,6 @@ import java.util.{logging => javalog}
 import java.net.{DatagramPacket, DatagramSocket, InetAddress, InetSocketAddress, SocketAddress}
 import java.text.SimpleDateFormat
 import scala.actors._
-import scala.actors.Actor._
 import net.lag.extensions._
 
 
@@ -152,9 +151,10 @@ object Future {
   def apply(action: => Unit) = writer ! Do(() => action)
   def sync = writer !? Wait
 
-  private lazy val writer = actor {
-    while (true) {
-      receive {
+  private lazy val writer = new scala.actors.Actor {
+    start
+    def act = loop {
+      react {
         case Wait => reply(Wait)
         case Do(action) => action()
       }
