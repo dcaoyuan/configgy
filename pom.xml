@@ -17,6 +17,18 @@
         <relativePath>../aiotrade/libs/pom.xml</relativePath>
     </parent>
 
+    <properties>
+        <deploy.version>snapshots</deploy.version>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>repo.qa</id>
+            <name>Nyapc ${deploy.version} repository</name>
+            <url>http://repo.qa/content/repositories/${deploy.version}</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <testResources>
             <testResource>
