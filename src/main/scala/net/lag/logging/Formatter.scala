@@ -143,7 +143,7 @@ abstract class Formatter extends javalog.Formatter {
           if (useFullPackageNames) {
             nameSegments.slice(0, nameSegments.length - 1).mkString(".")
           } else {
-            nameSegments(nameSegments.length - 2)
+            nameSegments(nameSegments.length - 1)
           }
         } else {
           n
@@ -208,7 +208,7 @@ class GenericFormatter(format: String) extends Formatter {
   private val FORMAT = matcher.replaceFirst("%3\\$s")
 
   override def dateFormat = DATE_FORMAT
-  override def lineTerminator = "\n"
+  override val lineTerminator = System.getProperty("line.separator")
 
   override def formatPrefix(level: javalog.Level, date: String, name: String): String = {
     val levelName = level match {
