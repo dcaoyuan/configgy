@@ -110,16 +110,17 @@ private class SubscriptionNode {
  * set of attribute maps, and control the flow of subscriptions and events
  * for subscribers.
  */
+@serializable
 class Config extends ConfigMap {
   private var root = new Attributes(this, "")
-  private val subscribers = new SubscriptionNode
-  private val subscriberKeys = new mutable.HashMap[Int, (SubscriptionNode, Subscriber)]
+  @transient private val subscribers = new SubscriptionNode
+  @transient private val subscriberKeys = new mutable.HashMap[Int, (SubscriptionNode, Subscriber)]
   private var nextKey = 1
 
-  private var jmxNodes: List[String] = Nil
-  private var jmxPackageName: String = ""
-  private var jmxSubscriptionKey: Option[SubscriptionKey] = None
-  private var reloadAction: Option[() => Unit] = None
+  @transient private var jmxNodes: List[String] = Nil
+  @transient private var jmxPackageName: String = ""
+  @transient private var jmxSubscriptionKey: Option[SubscriptionKey] = None
+  @transient private var reloadAction: Option[() => Unit] = None
 
 
   /**
