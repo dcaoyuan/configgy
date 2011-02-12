@@ -24,15 +24,16 @@ import net.lag.extensions._
 
 
 private[configgy] abstract class Cell
-private[configgy] case class StringCell(value: String) extends Cell
-private[configgy] case class AttributesCell(attr: Attributes) extends Cell
-private[configgy] case class StringListCell(array: Array[String]) extends Cell
+@serializable private[configgy] case class StringCell(value: String) extends Cell
+@serializable private[configgy] case class AttributesCell(attr: Attributes) extends Cell
+@serializable private[configgy] case class StringListCell(array: Array[String]) extends Cell
 
 
 /**
  * Actual implementation of ConfigMap.
  * Stores items in Cell objects, and handles interpolation and key recursion.
  */
+@serializable
 private[configgy] class Attributes(val config: Config, val name: String) extends ConfigMap {
 
   private val cells = new mutable.HashMap[String, Cell]
@@ -146,13 +147,10 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
 
   def replaceWith(newAttributes: Attributes): Unit = {
     // stash away subnodes and reinsert them.
-    val subnodes = cells.map {
-      case (key, cell: AttributesCell) => (key, cell)
-      case _ => null
-    }.filter { _ ne null }.toList
+    val subnodes = cells.filter {_.isInstanceOf[AttributesCell]}
     cells.clear
     cells ++= newAttributes.cells
-    for ((key, cell) <- subnodes) {
+    for ((key, cell: AttributesCell) <- subnodes) {
       newAttributes.cells.get(key) match {
         case Some(AttributesCell(newattr)) =>
           cell.attr.replaceWith(newattr)

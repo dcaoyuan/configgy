@@ -70,6 +70,7 @@ trait Importer {
  * An Importer that looks for imported config files in the filesystem.
  * This is the default importer.
  */
+@serializable
 class FilesystemImporter(val baseFolder: String) extends Importer {
   def importFile(filename: String, required: Boolean): String = {
     var f = new File(filename)
