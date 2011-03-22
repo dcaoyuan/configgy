@@ -7,7 +7,7 @@
     <groupId>net.lag</groupId>
     <artifactId>configgy</artifactId>
     <packaging>jar</packaging>
-    <version>1.5.5</version>
+    <version>1.5.5.1</version>
     <name>net-lag-configgy</name>
 
     <parent>
