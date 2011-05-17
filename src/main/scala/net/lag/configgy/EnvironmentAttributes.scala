@@ -18,7 +18,7 @@ package net.lag.configgy
 
 import java.net.InetAddress
 import scala.collection.{immutable, mutable}
-import scala.collection.JavaConversions
+import scala.collection.JavaConversions._
 
 
 /**
@@ -26,14 +26,14 @@ import scala.collection.JavaConversions
  * fallback when looking up "$(...)" substitutions in config files.
  */
 private[configgy] object EnvironmentAttributes extends ConfigMap {
-  private val env = immutable.Map.empty[String, String] ++ (JavaConversions.asMap(System.getenv()).iterator)
+  private var env = immutable.Map.empty[String, String] ++ System.getenv()
 
   // deal with java.util.Properties extending
   // java.util.Hashtable[Object, Object] and not
   // java.util.Hashtable[String, String]
   private def getSystemProperties(): mutable.HashMap[String,String] = {
     val map = new mutable.HashMap[String, String]
-    for (entry <- JavaConversions.asMap(System.getProperties()).iterator) {
+    for (entry <- System.getProperties()) {
       entry match {
         case (k: String, v: String) => map.put(k, v)
         case _ =>
@@ -81,10 +81,10 @@ private[configgy] object EnvironmentAttributes extends ConfigMap {
     val dns = addr.getHostName
 
     if (ip ne null) {
-      env("HOSTIP") = ip
+      env += ("HOSTIP" -> ip)
     }
     if (dns ne null) {
-      env("HOSTNAME") = dns
+      env += ("HOSTNAME" -> dns)
     }
   } catch {
     case _ => // pass
