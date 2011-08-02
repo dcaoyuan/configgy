@@ -1,15 +1,10 @@
-
-<project xmlns="http://maven.apache.org/POM/4.0.0"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>net.lag</groupId>
-    <artifactId>configgy</artifactId>
-    <packaging>jar</packaging>
-    <version>1.5.5.1</version>
-    <name>net-lag-configgy</name>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <modelVersion>4.0.0</modelVersion>
+    
     <parent>
         <groupId>org.aiotrade</groupId>
         <artifactId>libs</artifactId>
@@ -17,17 +12,17 @@
         <relativePath>../aiotrade/libs/pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <deploy.version>releases</deploy.version>
-    </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>repo.qa</id>
-            <name>Nyapc ${deploy.version} repository</name>
-            <url>http://repo.qa/content/repositories/${deploy.version}</url>
-        </repository>
-    </distributionManagement>
+    <!-- ***************************************************************************************************************
+    *
+    * Project description
+    *
+    **************************************************************************************************************** -->
+    <groupId>net.lag</groupId>
+    <artifactId>configgy</artifactId>
+    <packaging>jar</packaging>
+    <version>1.5.5.1</version>
+    
+    <name>net-lag-configgy</name>
 
     <build>
         <testResources>
@@ -45,9 +40,6 @@
             <plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
-                <configuration>
-                    <verbose>true</verbose>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
