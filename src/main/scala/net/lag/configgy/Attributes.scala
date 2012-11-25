@@ -16,7 +16,6 @@
 
 package net.lag.configgy
 
-import java.util.regex.Pattern
 import javax.{management => jmx}
 import scala.collection.{immutable, mutable, Map}
 import scala.util.Sorting
@@ -53,18 +52,18 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
     val buffer = new StringBuilder("{")
     buffer ++= name
     buffer ++= (inheritFrom match {
-      case Some(a: Attributes) => " (inherit=" + a.name + ")"
-      case None => ""
-    })
+        case Some(a: Attributes) => " (inherit=" + a.name + ")"
+        case _ => ""
+      })
     buffer ++= ": "
-    for (val key <- sortedKeys) {
+    for (key <- sortedKeys) {
       buffer ++= key
       buffer ++= "="
       buffer ++= (cells(key) match {
-        case StringCell(x) => "\"" + x.quoteC + "\""
-        case AttributesCell(x) => x.toString
-        case StringListCell(x) => x.mkString("[", ",", "]")
-      })
+          case StringCell(x) => "\"" + x.quoteC + "\""
+          case AttributesCell(x) => x.toString
+          case StringListCell(x) => x.mkString("[", ",", "]")
+        })
       buffer ++= " "
     }
     buffer ++= "}"
@@ -77,7 +76,7 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
     } else {
       val other = obj.asInstanceOf[Attributes]
       (other.sortedKeys.toList == sortedKeys.toList) &&
-        (cells.keys forall (k => { cells(k) == other.cells(k) }))
+      (cells.keys forall (k => { cells(k) == other.cells(k) }))
     }
   }
 
@@ -94,19 +93,19 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
       cells.get(elems(0)) match {
         case Some(AttributesCell(x)) => x.lookupCell(elems(1))
         case None => inheritFrom match {
-          case Some(a: Attributes) =>
-            a.lookupCell(key)
-          case _ => None
-        }
+            case Some(a: Attributes) =>
+              a.lookupCell(key)
+            case _ => None
+          }
         case _ => None
       }
     } else {
       cells.get(elems(0)) match {
         case x @ Some(_) => x
         case None => inheritFrom match {
-          case Some(a: Attributes) => a.lookupCell(key)
-          case _ => None
-        }
+            case Some(a: Attributes) => a.lookupCell(key)
+            case _ => None
+          }
       }
     }
   }
@@ -132,10 +131,10 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
     val elems = key.split("\\.", 2)
     if (elems.length > 1) {
       val attr = (cells.get(elems(0)) match {
-        case Some(AttributesCell(x)) => x
-        case Some(_) => throw new ConfigException("Illegal key " + key)
-        case None => createNested(elems(0))
-      })
+          case Some(AttributesCell(x)) => x
+          case Some(_) => throw new ConfigException("Illegal key " + key)
+          case None => createNested(elems(0))
+        })
       attr.recurse(elems(1)) match {
         case ret @ Some((a, b)) => ret
         case None => Some((attr, elems(1)))
@@ -147,7 +146,7 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
 
   def replaceWith(newAttributes: Attributes): Unit = {
     // stash away subnodes and reinsert them.
-    val subnodes = cells.filter {_.isInstanceOf[AttributesCell]}
+    val subnodes = cells.filter {_._2.isInstanceOf[AttributesCell]}
     cells.clear
     cells ++= newAttributes.cells
     for ((key, cell: AttributesCell) <- subnodes) {
@@ -155,7 +154,7 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
         case Some(AttributesCell(newattr)) =>
           cell.attr.replaceWith(newattr)
           cells(key) = cell
-        case None =>
+        case _ =>
           cell.attr.replaceWith(new Attributes(config, ""))
       }
     }
@@ -223,9 +222,9 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
     recurse(key) match {
       case Some((attr, name)) => attr.setString(name, value)
       case None => cells.get(key) match {
-        case Some(AttributesCell(_)) => throw new ConfigException("Illegal key " + key)
-        case _ => cells.put(key, new StringCell(value))
-      }
+          case Some(AttributesCell(_)) => throw new ConfigException("Illegal key " + key)
+          case _ => cells.put(key, new StringCell(value))
+        }
     }
   }
 
@@ -238,9 +237,9 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
     recurse(key) match {
       case Some((attr, name)) => attr.setList(name, value)
       case None => cells.get(key) match {
-        case Some(AttributesCell(_)) => throw new ConfigException("Illegal key " + key)
-        case _ => cells.put(key, new StringListCell(value.toArray))
-      }
+          case Some(AttributesCell(_)) => throw new ConfigException("Illegal key " + key)
+          case _ => cells.put(key, new StringListCell(value.toArray))
+        }
     }
   }
 
@@ -279,24 +278,19 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
 
     recurse(key) match {
       case Some((attr, name)) => attr.remove(name)
-      case None => {
-        cells.removeKey(key) match {
-          case Some(_) => true
-          case None => false
-        }
-      }
+      case None => cells.remove(key).isDefined
     }
   }
 
   def asMap: Map[String, String] = {
     var ret = immutable.Map.empty[String, String]
     
-    for (val (key, value) <- cells) {
+    for ((key, value) <- cells) {
       value match {
         case StringCell(x) => ret += (key -> x)
         case StringListCell(x) => ret += (key -> x.mkString("[", ",", "]"))
         case AttributesCell(x) =>
-          for (val (k, v) <- x.asMap) {
+          for ((k, v) <- x.asMap) {
             ret += (key + "." + k -> v)
           }
       }
@@ -340,9 +334,9 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
       path match {
         case Nil => ""
         case attr :: xs => attr.getString(key) match {
-          case Some(x) => x
-          case None => lookup(key, xs)
-        }
+            case Some(x) => x
+            case None => lookup(key, xs)
+          }
       }
     }
 
@@ -372,7 +366,7 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
     }
 
     monitored = true
-    for (val cell <- cells.values) {
+    for (cell <- cells.values) {
       cell match {
         case AttributesCell(x) => x.setMonitored
         case _ => // pass
@@ -392,7 +386,7 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
       case Some(a: Attributes) => a.copyInto(attr)
       case _ =>
     }
-    for (val (key, value) <- cells.elements) {
+    for ((key, value) <- cells) {
       value match {
         case StringCell(x) => attr(key) = x
         case StringListCell(x) => attr(key) = x
@@ -404,14 +398,14 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
 
   def asJmxAttributes(): Array[jmx.MBeanAttributeInfo] = {
     cells.map { case (key, value) =>
-      value match {
-        case StringCell(_) =>
-          new jmx.MBeanAttributeInfo(key, "java.lang.String", "", true, true, false)
-        case StringListCell(_) =>
-          new jmx.MBeanAttributeInfo(key, "java.util.List", "", true, true, false)
-        case AttributesCell(_) =>
-          null
-      }
+        value match {
+          case StringCell(_) =>
+            new jmx.MBeanAttributeInfo(key, "java.lang.String", "", true, true, false)
+          case StringListCell(_) =>
+            new jmx.MBeanAttributeInfo(key, "java.util.List", "", true, true, false)
+          case AttributesCell(_) =>
+            null
+        }
     }.filter { x => x ne null }.toList.toArray
   }
 

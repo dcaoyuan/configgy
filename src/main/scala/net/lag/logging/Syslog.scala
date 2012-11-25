@@ -19,7 +19,6 @@ package net.lag.logging
 import java.util.{logging => javalog}
 import java.net.{DatagramPacket, DatagramSocket, InetAddress, InetSocketAddress, SocketAddress}
 import java.text.SimpleDateFormat
-import scala.actors._
 import net.lag.extensions._
 
 
@@ -133,31 +132,29 @@ class SyslogHandler(useIsoDateFormat: Boolean, server: String) extends Handler(n
   def publish(record: javalog.LogRecord) = {
     val data = formatter.format(record).getBytes
     val packet = new DatagramPacket(data, data.length, dest)
-    Future {
-      try {
-        socket.send(packet)
-      } catch {
-        case e =>
-          System.err.println(Formatter.formatStackTrace(e, 30).mkString("\n"))
-      }
+    // @todo use Future again
+    try {
+      socket.send(packet)
+    } catch {
+      case e: Throwable => System.err.println(Formatter.formatStackTrace(e, 30).mkString("\n"))
     }
   }
 }
 
-object Future {
-  private case class Do(action: () => Unit)
-  private case object Wait
-
-  def apply(action: => Unit) = writer ! Do(() => action)
-  def sync = writer !? Wait
-
-  private lazy val writer = new scala.actors.Actor {
-    start
-    def act = loop {
-      react {
-        case Wait => reply(Wait)
-        case Do(action) => action()
-      }
-    }
-  }
-}
+//object Future {
+//  private case class Do(action: () => Unit)
+//  private case object Wait
+//
+//  def apply(action: => Unit) = writer ! Do(() => action)
+//  def sync = writer !? Wait
+//
+//  private lazy val writer = new scala.actors.Actor {
+//    start
+//    def act = loop {
+//      react {
+//        case Wait => reply(Wait)
+//        case Do(action) => action()
+//      }
+//    }
+//  }
+//}

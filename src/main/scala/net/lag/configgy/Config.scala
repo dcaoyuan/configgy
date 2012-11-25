@@ -19,7 +19,7 @@ package net.lag.configgy
 import java.io.File
 import java.lang.management.ManagementFactory
 import javax.{management => jmx}
-import scala.collection.{Map, Set}
+import scala.collection.{Map}
 import scala.collection.{immutable, mutable}
 import net.lag.extensions._
 import net.lag.logging.Logger
@@ -46,9 +46,9 @@ private class SubscriptionNode {
 
   override def toString() = {
     val out = new StringBuilder("%d" format subscribers.size)
-    if (map.size > 0) {
+    if (!map.isEmpty) {
       out.append(" { ")
-      for (val key <- map.keys) {
+      for (key <- map.keys) {
         out.append(key)
         out.append("=")
         out.append(map(key).toString)
@@ -67,7 +67,7 @@ private class SubscriptionNode {
     }
 
     // first, call all subscribers for this node.
-    for (val subscriber <- subscribers) {
+    for (subscriber <- subscribers) {
       phase match {
         case VALIDATE_PHASE => subscriber.validate(current, replacement)
         case COMMIT_PHASE => subscriber.commit(current, replacement)
@@ -80,7 +80,7 @@ private class SubscriptionNode {
      */
     var nextNodes: Iterator[(String, SubscriptionNode)] = null
     key match {
-      case Nil => nextNodes = map.elements
+       case Nil => nextNodes = map.iterator
       case segment :: _ => {
         map.get(segment) match {
           case None => return     // done!
@@ -89,7 +89,7 @@ private class SubscriptionNode {
       }
     }
 
-    for (val (segment, node) <- nextNodes) {
+    for ((segment, node) <- nextNodes) {
       val subCurrent = current match {
         case None => None
         case Some(x) => x.getConfigMap(segment)
@@ -188,7 +188,7 @@ class Config extends ConfigMap {
     nextKey += 1
     var node = subscribers
     if (key ne null) {
-      for (val segment <- key.split("\\.")) {
+      for (segment <- key.split("\\.")) {
         node = node.get(segment)
       }
     }
@@ -261,7 +261,7 @@ class Config extends ConfigMap {
       }
     }
     // unregister nodes that vanished
-    (jmxNodes -- nodeNames).foreach { name => mbs.unregisterMBean(new jmx.ObjectName(name)) }
+    (jmxNodes.toSet -- nodeNames.toSet) foreach { name => mbs.unregisterMBean(new jmx.ObjectName(name)) }
 
     jmxNodes = nodeNames
     jmxPackageName = packageName
@@ -404,7 +404,7 @@ object Config {
    */
   def fromMap(m: Map[String, String]) = {
     val config = new Config
-    for ((k, v) <- m.elements) {
+    for ((k, v) <- m) {
       config(k) = v
     }
     config

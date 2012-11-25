@@ -159,7 +159,7 @@ class ScribeHandler(formatter: Formatter) extends Handler(formatter) {
       try {
         s.close()
       } catch {
-        case _ =>
+        case _: Throwable =>
       }
     }
     socket = None

@@ -88,7 +88,7 @@ class FilesystemImporter(val baseFolder: String) extends Importer {
           str
         } else ""
       } catch {
-        case x => throw new ParseException(x.toString)
+        case x: Throwable => throw new ParseException(x.toString)
       }
     }
   }
@@ -114,7 +114,7 @@ class ResourceImporter(classLoader: ClassLoader) extends Importer {
         str
       }
     } catch {
-      case x => throw new ParseException(x.toString)
+      case x: Throwable => throw new ParseException(x.toString)
     }
   }
 }

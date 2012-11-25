@@ -29,7 +29,7 @@ trait TestHelper {
 
   // recursively delete a folder. should be built in. bad java.
   private def deleteFolder(folder: File): Unit = {
-    for (val f <- folder.listFiles) {
+    for (f <- folder.listFiles) {
       if (f.isDirectory) {
         deleteFolder(f)
       } else {

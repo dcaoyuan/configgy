@@ -41,7 +41,7 @@ class RuntimeEnvironment(cls: Class[_]) {
   try {
     buildProperties.load(cls.getResource("build.properties").openStream)
   } catch {
-    case _ =>
+    case _: Throwable =>
   }
 
   val jarName = buildProperties.getProperty("name", "unknown")

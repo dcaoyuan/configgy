@@ -49,7 +49,7 @@ class FileHandler(val filename: String, val policy: Policy, formatter: Formatter
     flush()
     try {
       stream.close()
-    } catch { case _ => () }
+    } catch { case _: Throwable => () }
   }
 
   private def openLog() = {
@@ -123,7 +123,7 @@ class FileHandler(val filename: String, val policy: Policy, formatter: Formatter
       stream.write(getFormatter.format(record))
       stream.flush
     } catch {
-      case e =>
+      case e: Throwable =>
         System.err.println(Formatter.formatStackTrace(e, 30).mkString("\n"))
     }
   }

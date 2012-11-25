@@ -65,7 +65,7 @@ private[configgy] object EnvironmentAttributes extends ConfigMap {
   }
 
   def remove(key: String): Boolean = error("read-only attributes")
-  def keys: Iterator[String] = (getSystemProperties().keySet ++ env.keySet).elements
+  def keys: Iterator[String] = (getSystemProperties().keySet ++ env.keySet).iterator
   def asMap(): Map[String, String] = error("not implemented")
   def toConfigString = error("not implemented")
   def subscribe(subscriber: Subscriber): SubscriptionKey = error("not implemented")
@@ -87,6 +87,6 @@ private[configgy] object EnvironmentAttributes extends ConfigMap {
       env += ("HOSTNAME" -> dns)
     }
   } catch {
-    case _ => // pass
+    case _: Throwable => // pass
   }
 }

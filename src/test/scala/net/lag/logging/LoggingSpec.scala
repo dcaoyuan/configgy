@@ -86,7 +86,7 @@ object LoggingSpec extends SpecificationWithJUnit with TestHelper {
 
   // turn logged console lines into a list of repeatable strings
   private def eat(in: String): List[String] = {
-    for (val line <- in.split("\n").toList) yield {
+    for (line <- in.split("\n").toList) yield {
       line.regexSub("""LoggingSpec.scala:\d+""".r) { m => "LoggingSpec.scala:NNN" }
     }.regexSub("""LoggingSpec\$[\w\$]+""".r) {
       m => "LoggingSpec$$"
@@ -346,7 +346,7 @@ object LoggingSpec extends SpecificationWithJUnit with TestHelper {
       syslog.clearServerName
       log.debug("and debug!")
 
-      Future.sync
+      //Future.sync
       val p = new DatagramPacket(new Array[Byte](1024), 1024)
       serverSocket.receive(p)
       new String(p.getData, 0, p.getLength) mustEqual "<9>2008-03-29T05:53:16 raccoon.local whiskey: fatal message!"
@@ -362,7 +362,7 @@ object LoggingSpec extends SpecificationWithJUnit with TestHelper {
       log.addHandler(syslog)
       log.info("here's an info message with BSD time.")
       serverSocket.receive(p)
-      Future.sync
+      //Future.sync
       new String(p.getData, 0, p.getLength) mustEqual "<14>Mar 29 05:53:16 raccoon.local whiskey: here's an info message with BSD time."
     }
 

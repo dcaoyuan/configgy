@@ -46,7 +46,7 @@ final class ConfiggyString(wrapped: String) {
     var offset = 0
     var out = new StringBuilder
 
-    for (val m <- re.findAllIn(wrapped).matchData) {
+    for (m <- re.findAllIn(wrapped).matchData) {
       if (m.start > offset) {
         out.append(wrapped.substring(offset, m.start))
       }
@@ -124,7 +124,7 @@ final class ConfiggyString(wrapped: String) {
    */
   def unhexlify(): Array[Byte] = {
     val buffer = new Array[Byte](wrapped.length / 2)
-    for (val i <- 0.until(wrapped.length, 2)) {
+    for (i <- 0.until(wrapped.length, 2)) {
       buffer(i/2) = Integer.parseInt(wrapped.substring(i, i+2), 16).toByte
     }
     buffer
@@ -138,7 +138,7 @@ final class ConfiggyByteArray(wrapped: Array[Byte]) {
    */
   def hexlify(): String = {
     val out = new StringBuffer
-    for (val b <- wrapped) {
+    for (b <- wrapped) {
       val s = (b.toInt & 0xff).toHexString
       if (s.length < 2) {
         out append '0'

@@ -16,21 +16,22 @@
 
 package net.lag.logging
 
-import java.text.SimpleDateFormat
-import java.util.{Calendar, Date, logging => javalog}
+import java.util.{Calendar, logging => javalog}
 import scala.collection.Map
 import scala.collection.mutable
 import net.lag.extensions._
-import net.lag.configgy.{ConfigException, ConfigMap}
+import net.lag.configgy.{ConfigMap}
 
 
 // replace java's ridiculous log levels with the standard ones.
-sealed case class Level(name: String, value: Int) extends javalog.Level(name, value) {
+abstract class Level(val name: String, val value: Int) extends javalog.Level(name, value) {
   Logger.levelNamesMap(name) = this
-  Logger.levelsMap(value) = this
+  Logger.levelsMap(value) = this  
 }
 
 object Level {
+  def unapply(level: Level): Option[(String, Int)] = Some((level.name, level.value))
+
   case object OFF extends Level("OFF", Int.MaxValue)  // javalog.Level.OFF
   case object FATAL extends Level("FATAL", 1000)
   case object CRITICAL extends Level("CRITICAL", 970)
@@ -186,7 +187,7 @@ object Logger {
   private val javaRoot = javalog.Logger.getLogger("")
 
   // to force them to get loaded from class files:
-  Level.allLevels
+  val load = Level.allLevels
   reset
 
   // ----- convenience methods:
@@ -255,7 +256,7 @@ object Logger {
         for (handler <- handlers) {
           try {
             handler.close()
-          } catch { case _ => () }
+          } catch { case _: Throwable => () }
           logger.removeHandler(handler)
         }
       }
@@ -401,7 +402,7 @@ object Logger {
     }
 
     // options for using a logfile
-    for (val filename <- config.getString("filename")) {
+    for (filename <- config.getString("filename")) {
       // i bet there's an easier way to do this.
       val policy = config.getString("roll", "never").toLowerCase match {
         case "never" => Never
@@ -442,7 +443,7 @@ object Logger {
       }
     }
 
-    for (val handler <- handlers) {
+    for (handler <- handlers) {
       level.map { handler.setLevel(_) }
       handler.useUtc = config.getBool("utc", false)
       handler.truncateAt = config.getInt("truncate", 0)
