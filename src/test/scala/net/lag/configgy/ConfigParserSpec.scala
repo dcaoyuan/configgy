@@ -23,7 +23,7 @@ import net.lag.extensions._
 class ConfigParserSpec extends SpecificationWithJUnit {
 
   class FakeImporter extends Importer {
-    def importFile(filename: String, required: Boolean): String = {
+    def importFile(filename: String, charsetName: String, required: Boolean): String = {
       filename match {
         case "test1" =>
           "staff = \"weird skull\"\n"

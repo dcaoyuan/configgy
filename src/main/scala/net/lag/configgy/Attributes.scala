@@ -23,17 +23,16 @@ import net.lag.extensions._
 
 
 private[configgy] abstract class Cell
-@serializable private[configgy] case class StringCell(value: String) extends Cell
-@serializable private[configgy] case class AttributesCell(attr: Attributes) extends Cell
-@serializable private[configgy] case class StringListCell(array: Array[String]) extends Cell
+private[configgy] case class StringCell(value: String) extends Cell with Serializable
+private[configgy] case class AttributesCell(attr: Attributes) extends Cell with Serializable
+private[configgy] case class StringListCell(array: Array[String]) extends Cell with Serializable
 
 
 /**
  * Actual implementation of ConfigMap.
  * Stores items in Cell objects, and handles interpolation and key recursion.
  */
-@serializable
-private[configgy] class Attributes(val config: Config, val name: String) extends ConfigMap {
+private[configgy] class Attributes(val config: Config, val name: String) extends ConfigMap  with Serializable {
 
   private val cells = new mutable.HashMap[String, Cell]
   private var monitored = false
@@ -283,15 +282,15 @@ private[configgy] class Attributes(val config: Config, val name: String) extends
   }
 
   def asMap: Map[String, String] = {
-    var ret = immutable.Map.empty[String, String]
+    val ret = mutable.Map.empty[String, String]
     
     for ((key, value) <- cells) {
       value match {
-        case StringCell(x) => ret += (key -> x)
-        case StringListCell(x) => ret += (key -> x.mkString("[", ",", "]"))
+        case StringCell(x) => ret(key) = x
+        case StringListCell(x) => ret(key) = x.mkString("[", ",", "]")
         case AttributesCell(x) =>
           for ((k, v) <- x.asMap) {
-            ret += (key + "." + k -> v)
+            ret(key + "." + k) = v
           }
       }
     }
