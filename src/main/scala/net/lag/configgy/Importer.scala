@@ -32,7 +32,14 @@ trait Importer {
    * If the file couldn't be imported, throws a `ParseException`.
    */
   @throws(classOf[ParseException])
-  def importFile(filename: String, charsetName: String = "UTF-8", required: Boolean = true): String
+  def importFile(filename: String, required: Boolean): String
+
+  /**
+   * Imports a requested file and returns the string contents of that file.
+   * If the file couldn't be imported, throws a `ParseException`.
+   */
+  @throws(classOf[ParseException])
+  def importFile(filename: String): String = importFile(filename, true)
 
   private val BUFFER_SIZE = 8192
 
@@ -43,15 +50,15 @@ trait Importer {
    *
    * No exceptions are caught!
    */
-  protected def streamToString(in: InputStream, charsetName: String): String = {
-    val reader = new BufferedReader(new InputStreamReader(in, charsetName))
-    val buffer = Array.ofDim[Char](BUFFER_SIZE)
+  protected def streamToString(in: InputStream): String = {
+    val reader = new BufferedReader(new InputStreamReader(in, "UTF-8"))
+    val buffer = new Array[Char](BUFFER_SIZE)
     val out = new StringBuilder
     var n = 0
     while (n >= 0) {
       n = reader.read(buffer, 0, buffer.length)
       if (n >= 0) {
-        out.appendAll(buffer, 0, n)
+        out.append(buffer, 0, n)
       }
     }
     out.toString
@@ -63,8 +70,9 @@ trait Importer {
  * An Importer that looks for imported config files in the filesystem.
  * This is the default importer.
  */
-class FilesystemImporter(val baseFolder: String) extends Importer with Serializable {
-  def importFile(filename: String, charsetName: String = "UTF-8", required: Boolean = true): String = {
+@serializable
+class FilesystemImporter(val baseFolder: String) extends Importer {
+  def importFile(filename: String, required: Boolean): String = {
     var f = new File(filename)
     if (! f.isAbsolute) {
       f = new File(baseFolder, filename)
@@ -75,7 +83,7 @@ class FilesystemImporter(val baseFolder: String) extends Importer with Serializa
       try {
         val is = new FileInputStream(f)
         if (is != null) {
-          val str = streamToString(is, charsetName)
+          val str = streamToString(is)
           is.close
           str
         } else ""
@@ -92,7 +100,7 @@ class FilesystemImporter(val baseFolder: String) extends Importer with Serializa
  * of the system class loader (usually the jar used to launch this app).
  */
 class ResourceImporter(classLoader: ClassLoader) extends Importer {
-  def importFile(filename: String, charsetName: String = "UTF-8", required: Boolean = true): String = {
+  def importFile(filename: String, required: Boolean): String = {
     try {
       val is = classLoader.getResourceAsStream(filename)
       if (is eq null) {
@@ -101,12 +109,12 @@ class ResourceImporter(classLoader: ClassLoader) extends Importer {
         }
         ""
       } else {
-        val str = streamToString(is, charsetName)
+        val str = streamToString(is)
         is.close
         str
       }
     } catch {
-      case ex: Throwable => throw new ParseException(ex.toString)
+      case x: Throwable => throw new ParseException(x.toString)
     }
   }
 }

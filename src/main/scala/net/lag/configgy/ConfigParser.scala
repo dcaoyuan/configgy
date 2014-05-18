@@ -18,6 +18,7 @@ package net.lag.configgy
 
 import scala.collection.mutable.Stack
 import scala.util.parsing.combinator._
+import scala.util.parsing.input.CharSequenceReader
 import net.lag.extensions._
 
 
@@ -37,15 +38,15 @@ private[configgy] class ConfigParser(var attr: Attributes, val importer: Importe
   val sections = new Stack[String]
   var prefix = ""
 
-  // Stack reversed iteration order from 2.7 to 2.8!!
+ // Stack reversed iteration order from 2.7 to 2.8!!
   def sectionsString = sections.toList.reverse.mkString(".")
 
   // tokens
   override val whiteSpace = """(\s+|#[^\n]*\n)+""".r
-  val numberToken:  Parser[String] = """-?\d+(\.\d+)?""".r
-  val stringToken:  Parser[String] = ("\"" + """([^\\\"]|\\[^ux]|\\\n|\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2})*""" + "\"").r
-  val identToken:   Parser[String] = """([\da-zA-Z_][-\w]*)(\.[a-zA-Z_][-\w]*)*""".r
-  val assignToken:  Parser[String] = """=|\?=""".r
+  val numberToken: Parser[String] = """-?\d+(\.\d+)?""".r
+  val stringToken: Parser[String] = ("\"" + """([^\\\"]|\\[^ux]|\\\n|\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2})*""" + "\"").r
+  val identToken: Parser[String] = """([\da-zA-Z_][-\w]*)(\.[a-zA-Z_][-\w]*)*""".r
+  val assignToken: Parser[String] = """=|\?=""".r
   val tagNameToken: Parser[String] = """[a-zA-Z][-\w]*""".r
 
 
@@ -59,19 +60,19 @@ private[configgy] class ConfigParser(var attr: Attributes, val importer: Importe
 
   def includeOptFile = "include?" ~> string ^^ {
     case filename: String =>
-      new ConfigParser(attr.makeAttributes(sectionsString), importer) parse importer.importFile(filename, required = false)
+      new ConfigParser(attr.makeAttributes(sectionsString), importer) parse importer.importFile(filename, false)
   }
 
   def assignment = identToken ~ assignToken ~ value ^^ {
     case k ~ a ~ v => if (a match {
-          case "=" => true
-          case "?=" => ! attr.contains(prefix + k)
-        }) v match {
-        case x: Long => attr(prefix + k) = x
-        case x: String => attr(prefix + k) = x
-        case x: Array[String] => attr(prefix + k) = x
-        case x: Boolean => attr(prefix + k) = x
-      }
+      case "=" => true
+      case "?=" => ! attr.contains(prefix + k)
+    }) v match {
+      case x: Long => attr(prefix + k) = x
+      case x: String => attr(prefix + k) = x
+      case x: Array[String] => attr(prefix + k) = x
+      case x: Boolean => attr(prefix + k) = x
+    }
   }
 
   def toggle = identToken ~ trueFalse ^^ { case k ~ v => attr(prefix + k) = v }
@@ -121,9 +122,9 @@ private[configgy] class ConfigParser(var attr: Attributes, val importer: Importe
   def trueFalse: Parser[Boolean] = ("(true|on)".r ^^ { x => true }) | ("(false|off)".r ^^ { x => false })
 
 
-  def parse(in: String) {
+  def parse(in: String): Unit = {
     parseAll(root, in) match {
-      case Success(result, _) => 
+      case Success(result, _) => result
       case x @ Failure(msg, z) => throw new ParseException(x.toString)
       case x @ Error(msg, _) => throw new ParseException(x.toString)
     }
