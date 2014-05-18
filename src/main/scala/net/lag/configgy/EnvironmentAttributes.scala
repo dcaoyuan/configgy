@@ -26,18 +26,15 @@ import scala.collection.JavaConversions._
  * fallback when looking up "$(...)" substitutions in config files.
  */
 private[configgy] object EnvironmentAttributes extends ConfigMap {
-  private var env = immutable.Map.empty[String, String] ++ System.getenv()
+  private val env = mutable.Map.empty[String, String] ++ System.getenv()
 
   // deal with java.util.Properties extending
   // java.util.Hashtable[Object, Object] and not
   // java.util.Hashtable[String, String]
   private def getSystemProperties(): mutable.HashMap[String,String] = {
     val map = new mutable.HashMap[String, String]
-    for (entry <- System.getProperties()) {
-      entry match {
-        case (k: String, v: String) => map.put(k, v)
-        case _ =>
-      }
+    for ((k, v) <- System.getProperties()) {
+      map.put(k, v)
     }
     map
   }
@@ -81,10 +78,10 @@ private[configgy] object EnvironmentAttributes extends ConfigMap {
     val dns = addr.getHostName
 
     if (ip ne null) {
-      env += ("HOSTIP" -> ip)
+      env("HOSTIP") = ip
     }
     if (dns ne null) {
-      env += ("HOSTNAME" -> dns)
+      env("HOSTNAME") = dns
     }
   } catch {
     case _: Throwable => // pass

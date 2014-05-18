@@ -80,13 +80,13 @@ private class SubscriptionNode {
      */
     var nextNodes: Iterator[(String, SubscriptionNode)] = null
     key match {
-       case Nil => nextNodes = map.iterator
+      case Nil => nextNodes = map.iterator
       case segment :: _ => {
-        map.get(segment) match {
-          case None => return     // done!
-          case Some(node) => nextNodes = Iterator.single((segment, node))
+          map.get(segment) match {
+            case None => return     // done!
+            case Some(node) => nextNodes = Iterator.single((segment, node))
+          }
         }
-      }
     }
 
     for ((segment, node) <- nextNodes) {
@@ -199,11 +199,11 @@ class Config extends ConfigMap {
 
   private[configgy] def subscribe(key: String)(f: (Option[ConfigMap]) => Unit): SubscriptionKey = {
     subscribe(key, new Subscriber {
-      def validate(current: Option[ConfigMap], replacement: Option[ConfigMap]): Unit = { }
-      def commit(current: Option[ConfigMap], replacement: Option[ConfigMap]): Unit = {
-        f(replacement)
-      }
-    })
+        def validate(current: Option[ConfigMap], replacement: Option[ConfigMap]): Unit = { }
+        def commit(current: Option[ConfigMap], replacement: Option[ConfigMap]): Unit = {
+          f(replacement)
+        }
+      })
   }
 
   def subscribe(subscriber: Subscriber) = subscribe(null.asInstanceOf[String], subscriber)
@@ -214,10 +214,10 @@ class Config extends ConfigMap {
     subscriberKeys.get(subkey.id) match {
       case None => false
       case Some((node, sub)) => {
-        node.subscribers -= sub
-        subscriberKeys -= subkey.id
-        true
-      }
+          node.subscribers -= sub
+          subscriberKeys -= subkey.id
+          true
+        }
     }
   }
 
@@ -253,12 +253,12 @@ class Config extends ConfigMap {
     val nodeNames = nodes.map { case (name, bean) => name }
     // register any new nodes
     nodes.filter { name => !(jmxNodes contains name) }.foreach { case (name, bean) =>
-      try {
-        mbs.registerMBean(bean, new jmx.ObjectName(name))
-      } catch {
-        case x: jmx.InstanceAlreadyExistsException =>
-          // happens in unit tests.
-      }
+        try {
+          mbs.registerMBean(bean, new jmx.ObjectName(name))
+        } catch {
+          case x: jmx.InstanceAlreadyExistsException =>
+            // happens in unit tests.
+        }
     }
     // unregister nodes that vanished
     (jmxNodes.toSet -- nodeNames.toSet) foreach { name => mbs.unregisterMBean(new jmx.ObjectName(name)) }
@@ -409,4 +409,71 @@ object Config {
     }
     config
   }
+  
+  // -- simple test
+  def main(args: Array[String]) {
+    val simpleTestData = """
+log {
+  filename = "./aiotrade.log"
+  roll = "never"  # Options: never, hourly, daily, sunday/monday/...
+  level = "debug" # Options: off, fatal, critical, error, warning, info, debug, trace, all
+  console = off
+  append = false
+  # syslog_host = ""
+  # syslog_server_name = ""
+}
+
+market {
+  exchanges = [
+    "SS",
+    "SZ",
+  ]
+}
+
+orm {
+  avro {
+    dir = "/Users/dcaoyuan/.fd/dev/data/"
+  }
+
+  dialect = "ru.circumflex.orm.H2Dialect"
+  defaultSchema = "orm"
+
+  connection {
+    driver = "org.h2.Driver"
+    url = "jdbc:h2:~/.fd/dev/db/aiotrade"
+    username = "sa"
+    password = ""
+  }
+}
+
+#orm {
+#  dialect = "ru.circumflex.orm.MySQLDialect"
+#  defaultSchema = "orm"
+#
+#  connection {
+#    driver = "com.mysql.jdbc.Driver"
+#    url = "jdbc:mysql://localhost:3306/faster?autoReconnect=true&useUnicode=true"
+#    username = "root"
+#    password = ""
+#  }
+#}
+
+dataserver {
+  client = false
+}
+
+cluster {
+  convergenceDelta = 0.0000000001
+  maxIter = 80
+  maxEigens = 32
+  identPeriod = 5
+  testPeriod = 5
+  tradePeriod = 3
+}
+
+"""
+    val conig = fromString(simpleTestData)
+
+  }
+  
 }

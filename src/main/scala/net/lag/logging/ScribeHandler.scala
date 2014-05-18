@@ -32,7 +32,7 @@ object ScribeHandler {
 
 class ScribeHandler(formatter: Formatter) extends Handler(formatter) {
   // it may be necessary to log errors here if scribe is down:
-  private val log = Logger.get("scribe")
+  val log = Logger.get("scribe")
 
   // send a scribe message no more frequently than this:
   var bufferTimeMilliseconds = 100
